@@ -12,9 +12,12 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
 
 export default class MyPlugin extends Plugin {
 	settings: MyPluginSettings;
+	private selectCount: number;
+	private lastPressTime: Date;
 
 	async onload() {
 		await this.loadSettings();
+		console.log('Hello world')
 
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
@@ -27,6 +30,57 @@ export default class MyPlugin extends Plugin {
 		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
 		const statusBarItemEl = this.addStatusBarItem();
 		statusBarItemEl.setText('Status Bar Text');
+
+
+		// note alt+enter add new
+		this.addCommand({
+			id: "add-new",
+			name: "Add New",
+			hotkeys: [{
+				modifiers: ["Alt"],
+				key: 'Enter'
+			}],
+			editorCallback: (editor) => {
+				const cursor = editor.getCursor(); // 获取当前光标位置
+				const currentLine = editor.getLine(cursor.line); // 获取当前行的内容
+
+				// 匹配行首的空格或制表符来确定缩进
+				const indentMatch = currentLine.match(/^(\s*)/);
+				let indent = '';
+				if (indentMatch) {
+					indent = indentMatch[1];
+				}
+
+				const insertText = '\n' + indent + '- '; // 将缩进添加到插入文本中
+				editor.replaceRange(insertText, cursor); // 插入新内容
+
+				// 计算新光标位置
+				const newCursorPos = {
+					line: cursor.line + 1, // 移动到下一行
+					ch: insertText.length - 1 // 移动到插入文本的末尾
+				};
+
+				editor.setCursor(newCursorPos); // 更新光标位置
+				console.log('add new');
+			},
+		});
+
+		// note alt+a
+		this.addCommand({
+			id: 'custom-select',
+			name: 'Custom Select',
+			hotkeys: [{
+				modifiers: ["Ctrl"],
+				key: 'a'
+			}],
+			editorCallback: (editor) => {
+				this.customSelect(editor);
+			},
+		});
+		this.selectCount = 0; // 初始化按键次数
+		this.lastPressTime = new Date(); // 初始化上一次按键时间
+
+
 
 		// This adds a simple command that can be triggered anywhere
 		this.addCommand({
@@ -71,7 +125,7 @@ export default class MyPlugin extends Plugin {
 		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
 		// Using this function will automatically remove the event listener when this plugin is disabled.
 		this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-			console.log('click', evt);
+			// console.log('click', evt);
 		});
 
 		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
@@ -88,6 +142,10 @@ export default class MyPlugin extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings);
+	}
+
+	private customSelect(editor: Editor) {
+		
 	}
 }
 
