@@ -3,12 +3,17 @@ import { Prec } from '@codemirror/state'
 // @ts-ignore
 import { EditorView, keymap } from '@codemirror/view'
 import { editorInfoField } from 'obsidian'
+import { fromMarkdown } from 'mdast-util-from-markdown'
 
-export default class Enter {
+export default class Backspace {
 	constructor(private plugin: MyPlugin) {}
 
 	load() {
 		const run = (editorView: EditorView): boolean => {
+			console.log('in mod backspace')
+			return true
+
+			// Bullet means the item point
 			if (this.plugin.isComposing) return false
 
 			const data = editorView.state.field(editorInfoField)
@@ -17,28 +22,49 @@ export default class Enter {
 
 			const cursor = editor.getCursor()
 			const currentLine = editor.getLine(cursor.line)
-
 			const isOutlineMode = /^(\t*)- /
 			if (!isOutlineMode.test(currentLine)) return false
 
-			const indent = getIndentLevel(currentLine)
-			const insertText = genItem(indent)
-			editor.replaceRange(insertText, cursor)
-			// move cursor to new item
-			const newCursorPos = {
-				line: cursor.line + 1,
-				ch: insertText.length - 1,
-			}
-			editor.setCursor(newCursorPos)
+			const preLine = editor.getLine(cursor.line - 1)
+			const nextLine = editor.getLine(cursor.line + 1)
 
-			return true
+			const isCursorAtBullet = /^(\t*)- $/
+			if (isCursorAtBullet.test(currentLine.slice(0, cursor.ch))) {
+				const hasContent = cursor.ch < currentLine.length
+				if (!hasContent) {
+					const from = {
+						line: cursor.line - 1,
+						ch: preLine.length,
+					}
+					editor.replaceRange('', from, cursor)
+					// set cursor
+					editor.setCursor(cursor.line - 1, preLine.length)
+					return true
+				}
+
+				const preIndent = getIndentLevel(preLine)
+				const currentIndent = getIndentLevel(currentLine)
+				if (preIndent === currentIndent) {
+					const from = {
+						line: cursor.line - 1,
+						ch: preLine.length,
+					}
+					editor.replaceRange('', from, cursor)
+					// set cursor
+					editor.setCursor(cursor.line - 1, preLine.length)
+					return true
+				}
+				return true
+			} else {
+				return false
+			}
 		}
 
 		this.plugin.registerEditorExtension(
 			Prec.highest(
 				keymap.of([
 					{
-						key: 'Enter',
+						key: 'Mod-delete',
 						// return boolean to show the key event is handled or not
 						run: run,
 					},
