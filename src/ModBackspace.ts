@@ -10,9 +10,6 @@ export default class Backspace {
 
 	load() {
 		const run = (editorView: EditorView): boolean => {
-			console.log('in mod backspace')
-			return true
-
 			// Bullet means the item point
 			if (this.plugin.isComposing) return false
 
@@ -64,7 +61,8 @@ export default class Backspace {
 			Prec.highest(
 				keymap.of([
 					{
-						key: 'Mod-delete',
+						mac: 'Alt-Backspace',
+						win: 'Ctrl-Backspace',
 						// return boolean to show the key event is handled or not
 						run: run,
 					},

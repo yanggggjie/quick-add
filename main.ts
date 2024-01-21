@@ -5,9 +5,9 @@ import CommandA from './src/CommandA'
 import AltEnter from './src/AltEnter'
 import Enter from './src/Enter'
 import Backspace from './src/Backspace'
-import Change from './src/Change'
 import Delete from './src/Delete'
 import ModBackspace from './src/ModBackspace'
+import Paste from './src/Paste'
 // Remember to rename these classes and interfaces!
 
 interface MyPluginSettings {
@@ -26,7 +26,7 @@ export default class MyPlugin extends Plugin {
 	delete: Delete
 	altA: CommandA
 	altEnter: AltEnter
-	change: Change
+	paste: Paste
 
 	// init composing
 	isComposing: boolean
@@ -75,17 +75,17 @@ export default class MyPlugin extends Plugin {
 		this.delete = new Delete(this)
 		this.delete.load()
 
-		// // note init altEnter
-		// this.altEnter = new AltEnter(this);
-		// this.altEnter.load();
-		//
-		// // note init altA
+		// note init altEnter
+		this.altEnter = new AltEnter(this)
+		this.altEnter.load()
+
+		// note init altA
 		this.altA = new CommandA(this)
 		this.altA.load()
 
-		// note init change
-		// this.change = new Change(this);
-		// this.change.load();
+		// note init paste
+		this.paste = new Paste(this)
+		this.paste.load()
 
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon(

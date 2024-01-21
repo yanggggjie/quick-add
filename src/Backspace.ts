@@ -10,7 +10,6 @@ export default class Backspace {
 
 	load() {
 		const run = (editorView: EditorView): boolean => {
-			console.log('in backspace')
 			// Bullet means the item point
 			if (this.plugin.isComposing) return false
 
